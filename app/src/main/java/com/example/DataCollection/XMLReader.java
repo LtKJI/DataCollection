@@ -7,6 +7,7 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -25,17 +26,24 @@ public class XMLReader implements IReader{
 	private Study myStudy;
 	Readings readings = new Readings();
 	
+	/**
+	 * Initializes the parser factory
+	 */
+	
 	public XMLReader() {
 		saxParserFactory = SAXParserFactory.newInstance();
 	}
 	
-	public void readXML(File fileName) {
+	/**
+	 * parses XML file
+	 * @param is
+	 */
+	
+	public void readXML(InputStream is) {
 		try {
-			File stateFile = fileName;
-			FileInputStream fis = new FileInputStream(stateFile);
 			SAXParser saxParser = saxParserFactory.newSAXParser();
 			XMLSAXParserHandler handler = new XMLSAXParserHandler();
-			saxParser.parse(fis, handler);
+			saxParser.parse(is, handler);
 			//Get Item List
 			myStudy = handler.getStudy();
 			readings.setReadings(handler.getItemList());
@@ -52,19 +60,22 @@ public class XMLReader implements IReader{
 	
 	/**
 	 * Read the XML file
+	 * @return
+	 * readings list
 	 */
-	public Readings getReadings(File fileName)  throws Exception{
-		this.readXML(fileName);
+	public Readings getReadings(InputStream is)  throws Exception{
+		this.readXML(is);
 		return readings;
 	}
 	
 	/**
 	 * This method returns the study imported from the input file
 	 * @return
+	 * myStudy
 	 */
-	public Study getStudy(File fileName)  throws Exception{
-		this.readXML(fileName);
-		myStudy.setSiteForReading(readings);
+	public Study getStudy(InputStream is)  throws Exception{
+		this.readXML(is);
+		myStudy.setSitesForReading(readings);
 		myStudy.addReadings(readings);
 		return myStudy;
 	}

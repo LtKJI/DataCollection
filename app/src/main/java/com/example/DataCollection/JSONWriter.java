@@ -1,64 +1,67 @@
 package com.example.DataCollection;
 
 import android.content.Context;
-import android.util.Log;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-
-import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Iterator;
 
+/**
+ * JSONWriter writes out .json files from a given input
+ */
 public class JSONWriter {
 
     public static final String TAG = "JSONWriter";
+
     public JSONWriter(){
 
     }
     /**
-     * WriteToFile method takes as a parameters a list of sites
-     * and a file name. It write the sites in the list to a file on the disk
+     * WriteToFileObject method takes as parameters an object to write,
+     * a file name, and a context. It writes the object to a file on the storage
+     * @param o Object to be written
+     * @param outputFileName Name of the output file
+     * @param context The context of the application
+     * @return
+     * void
      */
-    public void writeToFile(Record studyRecord, File outputFile) throws Exception{
+    public void writeToFileObject(Object o, String outputFileName, Context context) throws Exception{
+        String myJson;
+        Gson myGson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
+        myJson = myGson.toJson(o);
 
-        //path and construct of the output file
-        File myOutputFile = outputFile;
-        FileOutputStream fos = new FileOutputStream(myOutputFile);
-
-        //Write JSON object in pretty format
-        Gson myGson = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
-        //new instance of JSON Object that will contains iterations of study
-        JsonArray jObject = new JsonArray();
-        for(Study s : studyRecord.getStudies()){
-            jObject.add(myGson.toJsonTree(s));
-        }
-
-        String jsonString = myGson.toJson(jObject);
-        fos.write(jsonString.getBytes());
+        FileOutputStream fos;
+        fos = context.openFileOutput(outputFileName, Context.MODE_PRIVATE);
+        fos.write(myJson.getBytes());
         fos.close();
     }
+    
+    
+    /**
+     * WriteToFileRecord method takes as parameters an object to write,
+     * a file name, and a context. It writes the record to a file for storage
+     * 
+     * @param studyRecord The record to write to
+     * @param outputFileName The name of the output file
+     * @param context The context of the application
+     * @return
+     * void
+     */
 
     public void writeToFileRecord(Record studyRecord, String outputFileName, Context context) throws Exception{
-        //path and construct of the output file
-        FileOutputStream fos;
-        Log.d(TAG, "create File Output Stream");
-
-        String myJson = "hi";
-        Log.d(TAG, "create String");
-
-        Gson myGson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-        JsonArray jObject = new JsonArray();
-        for(Study s : studyRecord.getStudies()){
-            jObject.add(myGson.toJsonTree(s));
+        String myJson;
+        Gson myGson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
+        JsonArray myObj = new JsonArray();
+        Iterator<Study> it = studyRecord.iterator();
+        while(it.hasNext()) {
+            myObj.add(myGson.toJsonTree(it.next()));
         }
-        myJson = myGson.toJson(jObject);
-        Log.d(TAG, "JSON Object made");
+        myJson = myGson.toJson(myObj);
 
+        FileOutputStream fos;
         fos = context.openFileOutput(outputFileName, Context.MODE_PRIVATE);
-        Log.d(TAG, "FileOutput is open");
         fos.write(myJson.getBytes());
-        Log.d(TAG, "File is written");
         fos.close();
     }
 }
